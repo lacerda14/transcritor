@@ -1,0 +1,97 @@
+# ---------------------------------------------------------------------------
+# Transcritor — o que nunca entra no repositório
+# ---------------------------------------------------------------------------
+
+# --- Segredos e credenciais ---
+.env
+.env.*
+!.env.example
+secrets.json
+credentials.json
+
+# Cookies exportados do navegador (yt-dlp) = sessão logada do YouTube
+cookies.txt
+cookies*.txt
+*.cookies
+
+# --- Chaves ---
+*.pem
+*.p8
+*.key
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# --- Dependências / ambientes virtuais ---
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+node_modules/
+
+# --- Bytecode e artefatos Python ---
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+*.so
+.eggs/
+*.egg-info/
+
+# --- Builds ---
+dist/
+build/
+.output/
+.wrangler/
+*.spec
+
+# --- Caches ---
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Modelos faster-whisper (0,5–3 GB). O padrão é ~/.cache/huggingface/hub,
+# fora do repo — mas se HF_HOME apontar pra cá, fica ignorado do mesmo jeito.
+huggingface/
+models/
+*.bin.tmp
+
+# --- Saídas geradas em runtime ---
+# Áudios .wav/.mp3 dos jobs: mídia de terceiros + uploads do usuário
+downloads/
+# Logs do launchd: stack traces com caminhos da máquina e rastro de uso
+logs/
+*.log
+
+# --- Transcrições geradas (conteúdo pessoal) ---
+transcricoes/
+*.srt
+*.vtt
+
+# --- Sistema operacional / editores ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*~
+
+# --- launchd local (caminhos absolutos da máquina) ---
+# Versione só o template .example; o plist real com o seu caminho fica local.
+com.pedro.transcritor.local.plist

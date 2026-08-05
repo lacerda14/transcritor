@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transcritor</title>
+  <style>
+    :root {
+      --bg: #0b0d12; --panel: #141821; --panel2: #1b212d; --line: #262d3a;
+      --text: #e8ecf3; --muted: #8b93a5; --accent: #6ee7b7; --accent2: #38bdf8;
+      --danger: #f87171; --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: radial-gradient(1200px 800px at 70% -10%, #16202e 0%, var(--bg) 55%);
+      color: var(--text); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; padding: 40px 20px;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.02em; }
+    h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sub { color: var(--muted); margin: 0 0 28px; font-size: 14px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 18px; background: var(--panel2); padding: 5px; border-radius: 10px; }
+    .tab { flex: 1; text-align: center; padding: 9px; border-radius: 7px; cursor: pointer; color: var(--muted); font-weight: 600; font-size: 14px; user-select: none; transition: .15s; }
+    .tab.active { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+    label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 7px; font-weight: 600; }
+    input[type=text], input[type=url], select {
+      width: 100%; padding: 12px 14px; background: var(--panel2); border: 1px solid var(--line);
+      border-radius: 10px; color: var(--text); font-size: 15px; outline: none; transition: .15s;
+    }
+    input:focus, select:focus { border-color: var(--accent2); }
+    .drop {
+      border: 1.5px dashed var(--line); border-radius: 12px; padding: 30px; text-align: center;
+      color: var(--muted); cursor: pointer; transition: .15s; background: var(--panel2);
+    }
+    .drop.over { border-color: var(--accent); color: var(--text); }
+    .drop b { color: var(--text); }
+    .row { display: flex; gap: 14px; margin-top: 16px; }
+    .row > div { flex: 1; }
+    .hidden { display: none !important; }
+    button.go {
+      margin-top: 20px; width: 100%; padding: 14px; border: 0; border-radius: 11px; cursor: pointer;
+      font-size: 16px; font-weight: 700; color: #06231a;
+      background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: .15s;
+    }
+    button.go:hover { filter: brightness(1.06); }
+    button.go:disabled { opacity: .5; cursor: not-allowed; }
+    .bar { height: 8px; background: var(--panel2); border-radius: 99px; overflow: hidden; margin: 12px 0 6px; }
+    .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .3s; }
+    .stage { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+    .partial { margin-top: 14px; padding: 12px; background: var(--panel2); border-radius: 10px; font-size: 14px; color: var(--muted); max-height: 140px; overflow: auto; white-space: pre-wrap; }
+    textarea.result {
+      width: 100%; min-height: 300px; margin-top: 4px; padding: 16px; background: var(--panel2);
+      border: 1px solid var(--line); border-radius: 12px; color: var(--text); font-size: 15px;
+      line-height: 1.6; resize: vertical; outline: none;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .actions button, .actions a {
+      padding: 10px 16px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel2);
+      color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: .15s;
+    }
+    .actions button:hover, .actions a:hover { border-color: var(--accent2); }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .err { color: var(--danger); background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3); padding: 12px 14px; border-radius: 10px; font-size: 14px; }
+    .foot { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+    .foot code { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1><span>Transcritor</span></h1>
+    <p class="sub">Vídeo → texto, 100% local. Cole um link ou suba um arquivo — nada sai da sua máquina.</p>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-tab="url">Link do vídeo</div>
+        <div class="tab" data-tab="file">Arquivo</div>
+      </div>
+
+      <div id="pane-url">
+        <label>URL (YouTube, Instagram, TikTok, X, etc.)</label>
+        <input type="url" id="url" placeholder="https://..." autocomplete="off" />
+      </div>
+
+      <div id="pane-file" class="hidden">
+        <label>Arquivo de vídeo ou áudio</label>
+        <div class="drop" id="drop">
+          Arraste aqui ou <b>clique para escolher</b><br />
+          <small>mp4, mov, mkv, mp3, m4a, wav…</small>
+          <input type="file" id="file" accept="video/*,audio/*" class="hidden" />
+        </div>
+        <div class="meta" id="filename"></div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Modelo</label>
+          <select id="model">
+            {% for m in models %}
+            <option value="{{ m }}" {% if m == default_model %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Idioma (opcional)</label>
+          <select id="language">
+            <option value="">Detectar automático</option>
+            <option value="pt">Português</option>
+            <option value="en">Inglês</option>
+            <option value="es">Espanhol</option>
+            <option value="fr">Francês</option>
+            <option value="de">Alemão</option>
+            <option value="it">Italiano</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="go" id="go">Transcrever</button>
+    </div>
+
+    <div class="card hidden" id="progress-card">
+      <div class="stage"><span id="stage">Preparando…</span><span id="pct">0%</span></div>
+      <div class="bar"><i id="fill"></i></div>
+      <div class="partial hidden" id="partial"></div>
+    </div>
+
+    <div class="card hidden" id="result-card">
+      <label>Transcrição <span id="lang-tag" style="text-transform:none;color:var(--accent)"></span></label>
+      <textarea class="result" id="result" spellcheck="false"></textarea>
+      <div class="actions">
+        <button id="copy">Copiar</button>
+        <button id="dl-txt">Baixar .txt</button>
+        <button id="dl-srt">Baixar .srt</button>
+      </div>
+    </div>
+
+    <div class="card err hidden" id="error-card"></div>
+
+    <p class="foot">Motor: <code>faster-whisper</code> + <code>yt-dlp</code> + <code>ffmpeg</code>. Rode com <code>./run.sh</code>.</p>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let mode = "url", pollTimer = null, currentJob = null;
+
+    document.querySelectorAll(".tab").forEach((t) => {
+      t.onclick = () => {
+        document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+        t.classList.add("active");
+        mode = t.dataset.tab;
+        $("pane-url").classList.toggle("hidden", mode !== "url");
+        $("pane-file").classList.toggle("hidden", mode !== "file");
+      };
+    });
+
+    // upload
+    const drop = $("drop"), fileInput = $("file");
+    drop.onclick = () => fileInput.click();
+    fileInput.onchange = () => { if (fileInput.files[0]) $("filename").textContent = "📎 " + fileInput.files[0].name; };
+    ["dragover", "dragenter"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove("over"); }));
+    drop.addEventListener("drop", (ev) => {
+      if (ev.dataTransfer.files[0]) { fileInput.files = ev.dataTransfer.files; $("filename").textContent = "📎 " + ev.dataTransfer.files[0].name; }
+    });
+
+    $("go").onclick = async () => {
+      const fd = new FormData();
+      fd.append("model", $("model").value);
+      fd.append("language", $("language").value);
+      if (mode === "url") {
+        const u = $("url").value.trim();
+        if (!u) return alert("Cole a URL do vídeo.");
+        fd.append("url", u);
+      } else {
+        if (!fileInput.files[0]) return alert("Escolha um arquivo.");
+        fd.append("file", fileInput.files[0]);
+      }
+      reset();
+      $("go").disabled = true;
+      $("progress-card").classList.remove("hidden");
+      try {
+        const r = await fetch("/transcribe", { method: "POST", body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "Falha ao iniciar.");
+        currentJob = j.job_id;
+        poll();
+      } catch (e) { showError(e.message); $("go").disabled = false; }
+    };
+
+    function poll() {
+      pollTimer = setInterval(async () => {
+        try {
+          const r = await fetch("/status/" + currentJob);
+          const j = await r.json();
+          $("stage").textContent = j.stage || "…";
+          const p = j.progress || 0;
+          $("pct").textContent = p + "%";
+          $("fill").style.width = p + "%";
+          if (j.partial) { $("partial").classList.remove("hidden"); $("partial").textContent = j.partial; $("partial").scrollTop = $("partial").scrollHeight; }
+          if (j.status === "done") { clearInterval(pollTimer); done(j); }
+          else if (j.status === "error") { clearInterval(pollTimer); showError(j.error || "Erro na transcrição."); $("go").disabled = false; }
+        } catch (e) { /* mantém tentando */ }
+      }, 800);
+    }
+
+    function done(j) {
+      $("progress-card").classList.add("hidden");
+      $("result-card").classList.remove("hidden");
+      $("result").value = j.text || "(vazio — nenhuma fala detectada no áudio)";
+      $("lang-tag").textContent = j.detected_language ? "· " + j.detected_language : "";
+      $("go").disabled = false;
+    }
+
+    $("copy").onclick = () => { navigator.clipboard.writeText($("result").value); $("copy").textContent = "Copiado ✓"; setTimeout(() => ($("copy").textContent = "Copiar"), 1500); };
+
+    // Download explícito via fetch+blob: força o "salvar como" com nome decente,
+    // em vez de depender do navegador interpretar o <a> (Safari às vezes abre a aba).
+    async function downloadFile(fmt) {
+      if (!currentJob) return;
+      const btn = fmt === "txt" ? $("dl-txt") : $("dl-srt");
+      const label = btn.textContent;
+      btn.textContent = "Baixando…"; btn.disabled = true;
+      try {
+        const r = await fetch("/download/" + currentJob + "." + fmt);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const blob = await r.blob();
+        let name = "transcricao." + fmt;
+        const cd = r.headers.get("Content-Disposition") || "";
+        const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+        if (m) name = decodeURIComponent(m[1]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        btn.textContent = "Baixado ✓";
+      } catch (e) {
+        btn.textContent = "Erro ✗"; alert("Falha ao baixar: " + e.message);
+      }
+      btn.disabled = false;
+      setTimeout(() => (btn.textContent = label), 1800);
+    }
+    $("dl-txt").onclick = () => downloadFile("txt");
+    $("dl-srt").onclick = () => downloadFile("srt");
+
+    function reset() {
+      $("result-card").classList.add("hidden");
+      $("error-card").classList.add("hidden");
+      $("partial").classList.add("hidden"); $("partial").textContent = "";
+      $("fill").style.width = "0%"; $("pct").textContent = "0%";
+      if (pollTimer) clearInterval(pollTimer);
+    }
+    function showError(m) { $("progress-card").classList.add("hidden"); $("error-card").classList.remove("hidden"); $("error-card").textContent = "⚠ " + m; }
+  </script>
+</body>
+</html>

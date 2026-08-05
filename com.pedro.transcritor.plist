@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.pedro.transcritor</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/pedro.mattos/Desktop/transcritor/.venv/bin/python</string>
+        <string>/Users/pedro.mattos/Desktop/transcritor/app.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/pedro.mattos/Desktop/transcritor</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PORT</key>
+        <string>5005</string>
+        <key>WHISPER_MODEL</key>
+        <string>small</string>
+    </dict>
+
+    <!-- Sem isso o launchd trata o serviço como background: as threads vão pros
+         E-cores e a transcricao fica ~3x mais lenta (medido: 139s vs 45s). -->
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <!-- Sobe no login e reinicia sozinho se cair -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/pedro.mattos/Desktop/transcritor/logs/out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/pedro.mattos/Desktop/transcritor/logs/err.log</string>
+</dict>
+</plist>

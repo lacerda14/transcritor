@@ -1,0 +1,47 @@
+{
+  "name": "Transcritor (Python + Flask + faster-whisper)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "upgradePackages": true
+    }
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ffmpeg && pip install --upgrade pip && pip install -r requirements.txt",
+  "forwardPorts": [5005],
+  "portsAttributes": {
+    "5005": {
+      "label": "Transcritor",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "containerEnv": {
+    "PORT": "5005",
+    "WHISPER_MODEL": "base",
+    "PYTHONUNBUFFERED": "1"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "samuelcolvin.jinjahtml",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "yzhang.markdown-all-in-one"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/.venv": true
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
